@@ -59,6 +59,20 @@ UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
 
 osThreadId defaultTaskHandle;
+uint32_t defaultTaskBuffer[ 2048 ];
+osStaticThreadDef_t defaultTaskControlBlock;
+osThreadId sendTaskHandle;
+uint32_t sendTaskBuffer[ 2048 ];
+osStaticThreadDef_t sendTaskControlBlock;
+osThreadId receiveTaskHandle;
+uint32_t receiveTaskBuffer[ 2048 ];
+osStaticThreadDef_t receiveTaskControlBlock;
+osMutexId sl_send_lockHandle;
+osStaticMutexDef_t sl_send_lockControlBlock;
+osMutexId dl_send_lockHandle;
+osStaticMutexDef_t dl_send_lockControlBlock;
+osMutexId ph_send_lockHandle;
+osStaticMutexDef_t ph_send_lockControlBlock;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -71,6 +85,8 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 void StartDefaultTask(void const * argument);
+extern void StartSendTask(void const * argument);
+extern void StartReceiveTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -114,6 +130,19 @@ int main(void)
 
   /* USER CODE END 2 */
 
+  /* Create the mutex(es) */
+  /* definition and creation of sl_send_lock */
+  osMutexStaticDef(sl_send_lock, &sl_send_lockControlBlock);
+  sl_send_lockHandle = osMutexCreate(osMutex(sl_send_lock));
+
+  /* definition and creation of dl_send_lock */
+  osMutexStaticDef(dl_send_lock, &dl_send_lockControlBlock);
+  dl_send_lockHandle = osMutexCreate(osMutex(dl_send_lock));
+
+  /* definition and creation of ph_send_lock */
+  osMutexStaticDef(ph_send_lock, &ph_send_lockControlBlock);
+  ph_send_lockHandle = osMutexCreate(osMutex(ph_send_lock));
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -128,8 +157,16 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 2048, defaultTaskBuffer, &defaultTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* definition and creation of sendTask */
+  osThreadStaticDef(sendTask, StartSendTask, osPriorityNormal, 0, 2048, sendTaskBuffer, &sendTaskControlBlock);
+  sendTaskHandle = osThreadCreate(osThread(sendTask), NULL);
+
+  /* definition and creation of receiveTask */
+  osThreadStaticDef(receiveTask, StartReceiveTask, osPriorityNormal, 0, 2048, receiveTaskBuffer, &receiveTaskControlBlock);
+  receiveTaskHandle = osThreadCreate(osThread(receiveTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -253,9 +290,22 @@ static void MX_DMA_Init(void)
 static void MX_GPIO_Init(void)
 {
 
+  GPIO_InitTypeDef GPIO_InitStruct;
+
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PC0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 
@@ -273,12 +323,33 @@ void StartDefaultTask(void const * argument)
   {
 	  sl_send(0,0,"test", 4);
 
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 0);
 	  osDelay(500);
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
 	  osDelay(500);
   }
   /* USER CODE END 5 */ 
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM14 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+/* USER CODE BEGIN Callback 0 */
+
+/* USER CODE END Callback 0 */
+  if (htim->Instance == TIM14) {
+    HAL_IncTick();
+  }
+/* USER CODE BEGIN Callback 1 */
+
+/* USER CODE END Callback 1 */
 }
 
 /**

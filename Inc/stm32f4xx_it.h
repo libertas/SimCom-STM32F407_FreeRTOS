@@ -53,6 +53,7 @@ void UsageFault_Handler(void);
 void DebugMon_Handler(void);
 void SysTick_Handler(void);
 void USART1_IRQHandler(void);
+void TIM8_TRG_COM_TIM14_IRQHandler(void);
 void DMA2_Stream7_IRQHandler(void);
 
 #ifdef __cplusplus
