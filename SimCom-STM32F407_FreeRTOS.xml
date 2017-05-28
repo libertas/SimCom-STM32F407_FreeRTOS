@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<targetDefinitions xmlns="http://openstm32.org/stm32TargetDefinitions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openstm32.org/stm32TargetDefinitions stm32TargetDefinitions.xsd">
+  <board id="simcom-stm32f407_freertos">
+    <name>SimCom-STM32F407_FreeRTOS</name>
+    <mcuId>stm32f407vetx</mcuId>
+    <dbgIF>SWD</dbgIF>
+    <dbgDEV>ST-Link</dbgDEV>
+  </board>
+</targetDefinitions>
