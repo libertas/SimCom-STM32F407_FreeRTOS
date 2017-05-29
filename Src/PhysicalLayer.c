@@ -20,12 +20,10 @@ UART_HandleTypeDef *uart_device;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	char *p = huart->pRxBuffPtr - 1;
-
-	ph_receive_intr(*p);
+	ph_receive_intr(*ph_receive_it_buf);
 
 
-	HAL_UART_Receive_IT(huart, p, 1);
+	HAL_UART_Receive_IT(huart, ph_receive_it_buf, 1);
 }
 
 bool ph_init(UART_HandleTypeDef *device)
