@@ -59,13 +59,13 @@ UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
 
 osThreadId defaultTaskHandle;
-uint32_t defaultTaskBuffer[ 2048 ];
+uint32_t defaultTaskBuffer[ 256 ];
 osStaticThreadDef_t defaultTaskControlBlock;
 osThreadId sendTaskHandle;
-uint32_t sendTaskBuffer[ 2048 ];
+uint32_t sendTaskBuffer[ 256 ];
 osStaticThreadDef_t sendTaskControlBlock;
 osThreadId receiveTaskHandle;
-uint32_t receiveTaskBuffer[ 2048 ];
+uint32_t receiveTaskBuffer[ 256 ];
 osStaticThreadDef_t receiveTaskControlBlock;
 osMutexId sl_send_lockHandle;
 osStaticMutexDef_t sl_send_lockControlBlock;
@@ -157,15 +157,15 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 2048, defaultTaskBuffer, &defaultTaskControlBlock);
+  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256, defaultTaskBuffer, &defaultTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of sendTask */
-  osThreadStaticDef(sendTask, StartSendTask, osPriorityNormal, 0, 2048, sendTaskBuffer, &sendTaskControlBlock);
+  osThreadStaticDef(sendTask, StartSendTask, osPriorityNormal, 0, 256, sendTaskBuffer, &sendTaskControlBlock);
   sendTaskHandle = osThreadCreate(osThread(sendTask), NULL);
 
   /* definition and creation of receiveTask */
-  osThreadStaticDef(receiveTask, StartReceiveTask, osPriorityNormal, 0, 2048, receiveTaskBuffer, &receiveTaskControlBlock);
+  osThreadStaticDef(receiveTask, StartReceiveTask, osPriorityNormal, 0, 256, receiveTaskBuffer, &receiveTaskControlBlock);
   receiveTaskHandle = osThreadCreate(osThread(receiveTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
