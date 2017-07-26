@@ -52,6 +52,8 @@
 
 /* USER CODE BEGIN Includes */
 
+#include <string.h>
+
 #include "mpu6050.h"
 
 /* USER CODE END Includes */
@@ -350,9 +352,6 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  mpu6050_get_kine_state(&ks);
-	  sl_send(0,0,&(ks.ax), 12);
-
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 0);
 	  osDelay(500);
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
