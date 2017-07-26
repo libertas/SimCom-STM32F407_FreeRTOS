@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>STM32F407-MPU6050</name>
+	<name>SimCom-STM32F407_FreeRTOS</name>
 	<comment />
 	<projects>
 	</projects>
